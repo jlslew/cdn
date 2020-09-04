@@ -1,0 +1,19 @@
+{
+  "description": "A cdn to host mithril components for different projects",
+  "private": true,
+  "dependencies": {
+    "async": "*",
+    "mithril": "*"
+  },
+  "devDependencies": {
+    "glob": "*",
+    "lodash": "*",
+    "systemjs": "*",
+    "terser-webpack-plugin": "*",
+    "webpack": "*",
+    "webpack-cli": "*"
+  },
+  "scripts": {
+    "build": "webpack -p"
+  }
+}
