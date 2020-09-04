@@ -6,8 +6,14 @@
     "mithril": "*"
   },
   "devDependencies": {
+    "autoprefixer": "*",
+    "construct-style-sheets-polyfill": "*",
+    "css-loader": "*",
+    "cssnano": "*",
     "glob": "*",
     "lodash": "*",
+    "mini-css-extract-plugin": "*",
+    "postcss-loader": "*",
     "systemjs": "*",
     "terser-webpack-plugin": "*",
     "ts-loader": "*",

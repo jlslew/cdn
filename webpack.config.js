@@ -1,4 +1,4 @@
-const _ = require(`lodash`);
+const _ = require(`lodash`), MiniCssExtractPlugin = require(`mini-css-extract-plugin`);
 
 module.exports = require(`glob`).sync(`${__dirname}/src/**/webpack.config.js`).map(file =>
     _.mergeWith({
@@ -19,13 +19,33 @@ module.exports = require(`glob`).sync(`${__dirname}/src/**/webpack.config.js`).m
                 use: {
                     loader: `ts-loader`
                 }
+            }, {
+                test: /\.css$/,
+                use: [
+                    MiniCssExtractPlugin.loader, `css-loader`, {
+                        loader: `postcss-loader`,
+                        options: {
+                            plugins: [
+                                require(`autoprefixer`),
+                                require(`cssnano`)({
+                                    preset: `default`
+                                })
+                            ]
+                        }
+                    }
+                ]
             }]
         },
         optimization: {
             minimizer: [
                 new (require(`terser-webpack-plugin`))()
             ]
-        }
+        },
+        plugins: [
+            new MiniCssExtractPlugin({
+                filename: `[name].css`
+            })
+        ]
     }, require(file), (object, source) => _.isArray(object) ? object.concat(source) : undefined)
 ).concat({
     entry: require(`glob`).sync(`${__dirname}/src/**/demo.js`).reduce((entries, entry) => {
