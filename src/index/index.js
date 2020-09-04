@@ -2,6 +2,7 @@ import async from 'async';
 import m from 'mithril';
 
 window.async = async;
+window.fa = null;
 window.m = m;
 
 window.q = (function queue() {
@@ -36,7 +37,10 @@ window.q = (function queue() {
 
 export function ready(component) {
     m.mount(document.body, {
-        oninit: vnode => vnode.state.component = component(),
+        oninit: vnode => q.push(`${__webpack_public_path__}fa.js`, (error, module) => {
+            vnode.state.component = component();
+            window.fa = module;
+        }),
         view: vnode => m(vnode.state.component || ``)
     });
 }
