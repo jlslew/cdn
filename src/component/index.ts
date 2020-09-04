@@ -1,10 +1,12 @@
+declare const async;
+declare const q;
 declare const m;
 
 export default class Component {
     private attrs = {};
     private children;
 
-    public constructor(private selector = ``, attrs = {}) {
+    public constructor(protected selector = ``, attrs = {}) {
         this.init(typeof selector === 'string' ? this : selector, attrs);
     }
 
@@ -16,8 +18,16 @@ export default class Component {
         // Do nothing
     }
 
+    public decorate(decorators, attrs = {}, callback = null) {
+        const promise = async.reduce(decorators.filter(Boolean), this, (memo, item, callback) =>
+                q.push(item, (error, Decorator) => callback(error, new Decorator(memo, attrs)))
+            , callback);
+
+        return typeof callback === `function` ? undefined : promise;
+    }
+
     public add(children) {
-        this.children = children;
+        this.children = typeof children === `function` ? children().bind(this) : children;
         return this;
     }
 
@@ -36,6 +46,10 @@ export default class Component {
 
     public view() {
         let children = this.children || [];
+
+        if (typeof children === `function`) {
+            children = children();
+        }
 
         if (Array.isArray(children)) {
             children = children.filter(Boolean).map(Component.render);
