@@ -5,11 +5,16 @@ window.async = async;
 window.fa = null;
 window.m = m;
 
+m.stream = require(`mithril/stream`);
+const loader = m.stream(true);
+
 window.q = (function queue() {
     return async.queue((task, callback) => {
         if (System.get(task)) {
             callback(null, System.get(task).default);
         } else {
+            loader(true);
+
             System.import(task).then(module => {
                 let q = queue(), dependencies = [];
                 m.redraw();
@@ -35,12 +40,19 @@ window.q = (function queue() {
     }, 5);
 })();
 
+window.q.drain(() => loader(false));
+
 export function ready(component) {
     m.mount(document.body, {
         oninit: vnode => q.push(`${__webpack_public_path__}fa.js`, (error, module) => {
             vnode.state.component = component();
             window.fa = module;
         }),
-        view: vnode => m(vnode.state.component || ``)
+        view: vnode => [
+            m(vnode.state.component || ``),
+            m(`.${styles[`loader`]}`, {
+                style: loader() ? `` : `display: none`
+            })
+        ]
     });
 }
