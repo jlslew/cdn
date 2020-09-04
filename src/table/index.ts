@@ -20,8 +20,10 @@ export default class TableComponent extends Component {
     }
 
     protected init(self, attrs) {
+        attrs.filters = {};
+
         self.add([
-            new Component(`thead.${TableStyle[`thead`]}`).add(
+            new Component(`thead.${TableStyle[`thead`]}`).add([
                 new Component(`tr.${TableStyle[`tr`]}`).add(() => {
                     const headers = m.stream([]);
                     const sort = m.stream({});
@@ -40,7 +42,30 @@ export default class TableComponent extends Component {
 
                     return headers;
                 }),
-            ),
+                attrs.filterable ? new Component(`tr.${TableStyle[`tr`]}[style=text-align:left]`).add(() => {
+                    const filters = m.stream([]);
+
+                    async.mapSeries(attrs.cols || [], (col, callback) => {
+                        attrs.filters[col.name] = m.stream(col.selectable === `multiple` ? [] : ``);
+
+                        if (typeof col.filter === `function`) {
+                            Component.strategize(`${__webpack_public_path__}select.js`, {
+                                selected: attrs.filters[col.name],
+                                selectable: col.selectable,
+                                placement: `bottom-start`,
+                                content: col.filter,
+                                filterable: true,
+                                data: attrs.data,
+                            }).then(component => callback(null, new Component(`th.${TableStyle[`th`]}`).add(component)
+                                .set(`data-label`, _.startCase(_.lowerCase(col.name)))));
+                        } else {
+                            callback(null, new Component(`th`));
+                        }
+                    }).then(filters);
+
+                    return filters;
+                }) : ``,
+            ]),
             new Component(`tbody.${TableStyle[`tbody`]}`).add(() => {
                 const selected = attrs.selected || m.stream(attrs.selectable === `multiple` ? [] : ``);
                 const children = m.stream({});
@@ -68,7 +93,14 @@ export default class TableComponent extends Component {
                     }),
                 ).then(m.redraw))(m.stream([]));
 
-                return () => _.map(attrs.data(), item => children[JSON.stringify(item)]);
+                return () => _.map(_.filter(attrs.data(), row => {
+                    const filters = _.reduce(attrs.filters, (count, filter) => count + (_.size(filter()) ? 1 : 0), 0);
+
+                    return _.size(_.filter(attrs.cols || [], col =>
+                        attrs.filters[col.name] && attrs.filters[col.name]() ?
+                            _[col.compare](attrs.filters[col.name](), row[col.name]) : false,
+                    )) === filters || filters === 0;
+                }), item => children[JSON.stringify(item)]);
             }),
         ]);
     }

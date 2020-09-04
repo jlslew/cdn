@@ -24,8 +24,13 @@ export default class PopperComponent extends Component {
         let popper = null;
 
         self.add([
-            new Component(`summary.${PopperStyle[`summary`]}`).set(`onclick`, () => popper.update())
-                .add(typeof attrs.label === `function` ? attrs.label(attrs) : attrs.label),
+            new Component(`summary.${PopperStyle[`summary`]}`).set(`onclick`, () => {
+                if (!popper) {
+                    m.redraw.sync();
+                }
+
+                popper.update();
+            }).add(typeof attrs.label === `function` ? attrs.label(attrs) : attrs.label),
             new Component(`.${PopperStyle[`div`]}`).set(`onupdate`, vnode => {
                 popper = Popper.createPopper(vnode.dom.parentNode, vnode.dom, {
                     placement: attrs.placement,
