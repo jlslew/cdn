@@ -22,21 +22,37 @@ export default class TableComponent extends Component {
     protected init(self, attrs) {
         self.add([
             new Component(`thead.${TableStyle[`thead`]}`).add(
-                new Component(`tr.${TableStyle[`tr`]}`).add(
-                    _.map(attrs.cols || [], col => new Component(`th.${TableStyle[`th`]}`).add(
-                        _.startCase(_.lowerCase(col.name)),
-                    )),
-                ),
+                new Component(`tr.${TableStyle[`tr`]}`).add(() => {
+                    const headers = m.stream([]);
+                    const sort = m.stream({});
+
+                    async.mapSeries(attrs.cols || [], (col, callback) =>
+                        new Component(`span`).add(_.startCase(_.lowerCase(col.name))).decorate([
+                                attrs.sortable ? `${__webpack_public_path__}sortable.js` : ``,
+                            ], {
+                                data: attrs.data,
+                                name: col.name,
+                                sort: sort,
+                            }, (error, component) =>
+                                callback(error, new Component(`th.${TableStyle[`th`]}`).add(component)),
+                        ),
+                    ).then(headers).then(m.redraw);
+
+                    return headers;
+                }),
             ),
             new Component(`tbody.${TableStyle[`tbody`]}`).add(() => {
                 const selected = attrs.selected || m.stream(attrs.selectable === `multiple` ? [] : ``);
-                const children = m.stream([]);
+                const children = m.stream({});
 
-                (components => async.mapSeries(attrs.data() || [], (row, callback) =>
+                (components => async.eachSeries(attrs.data() || [], (row, callback) =>
                     new Component(`tr.${TableStyle[`tr`]}`).add(
-                        _.map(attrs.cols || [], col => new Component(`td.${TableStyle[`td`]}`).add(
-                            typeof col.render === `function` ? col.render(row) : row[col.name],
-                        ).set(`data-label`, _.startCase(_.lowerCase(col.name)))),
+                        _.map(attrs.cols || [], col => {
+                            const component = () => () => typeof col.render === `function` ? col.render(row) : row[col.name];
+
+                            return new Component(`td.${TableStyle[`td`]}`).add(component)
+                                .set(`data-label`, _.startCase(_.lowerCase(col.name)));
+                        }),
                     ).decorate([
                         attrs.strippable ? `${__webpack_public_path__}strippable.js` : ``,
                         attrs.selectable ? `${__webpack_public_path__}selectable.js` : ``,
@@ -46,10 +62,13 @@ export default class TableComponent extends Component {
                         value: JSON.stringify(row),
                         components: components,
                         selected: selected,
-                    }, callback),
-                ).then(children))(m.stream([]));
+                    }).then(component => {
+                        children[JSON.stringify(row)] = component;
+                        callback();
+                    }),
+                ).then(m.redraw))(m.stream([]));
 
-                return children;
+                return () => _.map(attrs.data(), item => children[JSON.stringify(item)]);
             }),
         ]);
     }
