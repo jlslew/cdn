@@ -14,6 +14,10 @@ export default class Component {
         return [];
     }
 
+    public static strategize(strategy, attrs = {}) {
+        return new Promise(resolve => q.push(strategy, (error, Strategy) => resolve(new Strategy(attrs))));
+    }
+
     protected init(self, attrs) {
         // Do nothing
     }
