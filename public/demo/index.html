@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>A simple deployment with the Now API!</title>
+
+        <meta name="description" content="A cdn to host mithril components for different projects" />
+        <meta name="keywords" content="mithril, webpack, typescript, now-sh" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <script>
+            const script = document.createElement(`script`);
+            document.body.append(script);
+
+            script.src = `/demo/${new URLSearchParams(window.location.search).get(`component`) || `index`}.js`;
+            script.async = true;
+        </script>
+    </body>
+</html>
