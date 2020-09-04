@@ -7,6 +7,24 @@ System.import(`${__webpack_public_path__}index.css`).then(callback => {
 
 System.import(`${__webpack_public_path__}index.js`).then($ => $.ready(() => ({
     oninit: vnode => {
+        q.push(`${__webpack_public_path__}calendar.js`, (error, Component) => {
+            const d = new Date();
+
+            vnode.state.components.push(new Component({
+                selected: m.stream([`${d.getFullYear()}-${_.padStart(d.getMonth() + 1, 2, `0`)}-${_.padStart(d.getDate() + 1, 2, `0`)}`]),
+                selectable: `multiple`
+            }));
+        });
+
+        q.push(`${__webpack_public_path__}calendar.js`, (error, Component) => {
+            const d = new Date();
+
+            vnode.state.components.push(new Component({
+                selected: m.stream(`${d.getFullYear()}-${_.padStart(d.getMonth() + 1, 2, `0`)}-${_.padStart(d.getDate() + 1, 2, `0`)}`),
+                selectable: true
+            }));
+        });
+
         q.push(`${__webpack_public_path__}list.js`, (error, Component) =>
             vnode.state.components.push(new Component({
                 selectable: `multiple`,

@@ -7,6 +7,12 @@ System.import(`${__webpack_public_path__}index.css`).then(callback => {
 
 System.import(`${__webpack_public_path__}index.js`).then($ => $.ready(() => ({
     oninit: vnode => {
+        q.push(`${__webpack_public_path__}calendar.js`, (error, Component) =>
+            vnode.state.components.push(new Component({
+                hoverable: true
+            }))
+        );
+
         q.push(`${__webpack_public_path__}list.js`, (error, Component) =>
             vnode.state.components.push(new Component({
                 hoverable: true,
