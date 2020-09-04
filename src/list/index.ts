@@ -38,6 +38,7 @@ export default class ListComponent extends Component {
                 const component = () => () => typeof attrs.render === `function` ? attrs.render(item) : item;
 
                 new Component(`li`).add(component).decorate([
+                    attrs.strippable ? `${__webpack_public_path__}strippable.js` : ``,
                     attrs.selectable ? `${__webpack_public_path__}selectable.js` : ``,
                     attrs.hoverable ? `${__webpack_public_path__}hoverable.js` : ``,
                 ], {
