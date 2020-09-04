@@ -10,6 +10,8 @@
     "lodash": "*",
     "systemjs": "*",
     "terser-webpack-plugin": "*",
+    "ts-loader": "*",
+    "typescript": "*",
     "webpack": "*",
     "webpack-cli": "*"
   },
