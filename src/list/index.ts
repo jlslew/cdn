@@ -39,6 +39,7 @@ export default class ListComponent extends Component {
 
                 new Component(`li`).add(component).decorate([
                     attrs.selectable ? `${__webpack_public_path__}selectable.js` : ``,
+                    attrs.hoverable ? `${__webpack_public_path__}hoverable.js` : ``,
                 ], {
                     selectable: attrs.selectable,
                     selected: selected,
